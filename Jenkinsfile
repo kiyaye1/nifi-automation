@@ -33,7 +33,7 @@ pipeline {
         stage('Checkout NiFi 1.26.0') {
             steps {
                 sh '''
-                    sh 'rm -rf nifi'
+                    rm -rf nifi
                     git clone https://github.com/apache/nifi.git
                     cd nifi
                     git checkout rel/nifi-1.26.0
