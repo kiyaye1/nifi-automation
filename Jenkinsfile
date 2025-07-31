@@ -26,7 +26,7 @@ pipeline {
             steps {
                 sh 'chmod +x ./terraform/inventory-gen.sh'
                 sh './terraform/inventory-gen.sh'
-                sh 'cat ansible/inventory.ini'
+                sh 'cat terraform/ansible/inventory.ini'
             }
         }
 
