@@ -21,7 +21,7 @@
         name: openjdk-17-jdk
         state: present
 
-    - name: Download NiFi {{ nifi_version }}
+    - name: Download NiFi
       get_url:
         url: "{{ nifi_archive_url }}"
         dest: "{{ nifi_zip_path }}"
@@ -59,7 +59,27 @@
         regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
         replace: '#\g<0>'
 
-    - name: Start NiFi
-      shell: "{{ nifi_target_dir }}/bin/nifi.sh start"
-      args:
-        chdir: "{{ nifi_target_dir }}/bin"
+    - name: Create NiFi systemd service
+      copy:
+        dest: /etc/systemd/system/nifi.service
+        content: |
+          [Unit]
+          Description=Apache NiFi
+          After=network.target
+
+          [Service]
+          Type=forking
+          ExecStart={{ nifi_target_dir }}/bin/nifi.sh start
+          ExecStop={{ nifi_target_dir }}/bin/nifi.sh stop
+          Restart=on-failure
+          User=ubuntu
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd and enable NiFi
+      systemd:
+        daemon_reload: yes
+        name: nifi
+        enabled: yes
+        state: started
