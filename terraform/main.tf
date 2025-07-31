@@ -7,7 +7,7 @@ data "aws_vpc" "default" {
 }
 
 resource "aws_security_group" "allow_nifi" {
-  name        = "allow_nifi"
+  name_prefix        = "allow_nifi"
   description = "Allow SSH, Jenkins, and NiFi"
   vpc_id      = data.aws_vpc.default.id
 
