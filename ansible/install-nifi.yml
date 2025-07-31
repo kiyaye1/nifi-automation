@@ -20,6 +20,10 @@
       apt:
         name: openjdk-17-jdk
         state: present
+    - name: Install unzip
+      apt:
+        name: unzip
+        state: present
 
     - name: Download NiFi
       get_url:
