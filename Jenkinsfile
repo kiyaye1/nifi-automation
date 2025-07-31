@@ -13,6 +13,12 @@ pipeline {
     }
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                cleanWs() // Clean up old files for a fresh build
+            }
+        }
+
         stage('Provision EC2 with Terraform') {
             steps {
                 dir('terraform') {
