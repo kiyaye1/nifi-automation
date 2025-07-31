@@ -42,6 +42,14 @@
       args:
         creates: "{{ nifi_target_dir }}"
 
+    - name: Ensure all NiFi files are owned by ubuntu
+      file:
+        path: "{{ nifi_target_dir }}"
+        state: directory
+        recurse: yes
+        owner: ubuntu
+        group: ubuntu
+
     - name: Ensure nifi.sh is executable and owned by ubuntu
       file:
         path: "{{ nifi_target_dir }}/bin/nifi.sh"
