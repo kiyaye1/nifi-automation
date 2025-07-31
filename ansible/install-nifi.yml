@@ -1,0 +1,57 @@
+---
+- name: Install and configure Apache NiFi
+  hosts: nifi
+  become: yes
+
+  tasks:
+    - name: Update APT packages
+      apt:
+        update_cache: yes
+
+    - name: Install Java 17
+      apt:
+        name: openjdk-17-jdk
+        state: present
+
+    - name: Download NiFi 1.26.0
+      get_url:
+        url: https://downloads.apache.org/nifi/1.26.0/nifi-1.26.0-bin.zip
+        dest: /opt/nifi-1.26.0-bin.zip
+
+    - name: Unzip NiFi
+      unarchive:
+        src: /opt/nifi-1.26.0-bin.zip
+        dest: /opt
+        remote_src: yes
+
+    - name: Rename NiFi directory
+      command: mv /opt/nifi-1.26.0 /opt/nifi
+      args:
+        creates: /opt/nifi
+
+    - name: Get EC2 private IP
+      shell: hostname -I | awk '{print $1}'
+      register: private_ip
+
+    - name: Set HTTP host to EC2 private IP
+      lineinfile:
+        path: /opt/nifi/conf/nifi.properties
+        regexp: '^nifi.web.http.host='
+        line: "nifi.web.http.host={{ private_ip.stdout }}"
+
+    - name: Set HTTP port to 8443
+      lineinfile:
+        path: /opt/nifi/conf/nifi.properties
+        regexp: '^nifi.web.http.port='
+        line: 'nifi.web.http.port=8443'
+
+    - name: Comment out security properties
+      replace:
+        path: /opt/nifi/conf/nifi.properties
+        regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
+        replace: '#\\0'
+
+    - name: Start NiFi
+      shell: nohup /opt/nifi/bin/nifi.sh start &
+      args:
+        chdir: /opt/nifi/bin
