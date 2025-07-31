@@ -67,24 +67,24 @@
         path: "{{ nifi_target_dir }}/conf/nifi.properties"
         regexp: '^nifi.web.http.host='
         line: "nifi.web.http.host={{ private_ip.stdout }}"
-  
+
     - name: Set HTTP port to 8443
       lineinfile:
         path: "{{ nifi_target_dir }}/conf/nifi.properties"
         regexp: '^nifi.web.http.port='
         line: 'nifi.web.http.port=8443'
-    
+
     - name: Comment out HTTPS host and port
       replace:
         path: "{{ nifi_target_dir }}/conf/nifi.properties"
         regexp: '^nifi.web.https.(host|port)='
         replace: '#\g<0>'
 
-- name: Comment out security properties
-  replace:
-    path: "{{ nifi_target_dir }}/conf/nifi.properties"
-    regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
-    replace: '#\g<0>'
+    - name: Comment out security properties
+      replace:
+        path: "{{ nifi_target_dir }}/conf/nifi.properties"
+        regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
+        replace: '#\g<0>'
 
     - name: Create NiFi systemd service
       copy:
