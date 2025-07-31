@@ -12,7 +12,6 @@ resource "aws_security_group" "allow_nifi" {
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    description = "SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -20,7 +19,6 @@ resource "aws_security_group" "allow_nifi" {
   }
 
   ingress {
-    description = "HTTPS for NiFi"
     from_port   = 8443
     to_port     = 8443
     protocol    = "tcp"
@@ -28,7 +26,6 @@ resource "aws_security_group" "allow_nifi" {
   }
 
   ingress {
-    description = "Jenkins"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
@@ -44,7 +41,7 @@ resource "aws_security_group" "allow_nifi" {
 }
 
 resource "aws_instance" "nifi_instance" {
-  ami           = "ami-04f167a56786e4b09"
+  ami           = "ami-04f167a56786e4b09"  # Ubuntu 22.04
   instance_type = "t2.medium"
   key_name      = "nifi"
   security_groups = [aws_security_group.allow_nifi.name]
