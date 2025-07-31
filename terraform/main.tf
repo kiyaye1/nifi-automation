@@ -50,7 +50,7 @@ resource "aws_instance" "nifi_instance" {
   security_groups = [aws_security_group.allow_nifi.name]
 
   root_block_device {
-    volume_size = 20
+    volume_size = 30
   }
 
   tags = {
