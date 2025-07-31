@@ -86,6 +86,12 @@
         regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
         replace: '#\g<0>'
 
+    - name: Disable remote input over HTTPS
+      lineinfile:
+        path: "{{ nifi_target_dir }}/conf/nifi.properties"
+        regexp: '^nifi.remote.input.secure='
+        line: 'nifi.remote.input.secure=false'
+
     - name: Create NiFi systemd service
       copy:
         dest: /etc/systemd/system/nifi.service
