@@ -7,11 +7,6 @@ pipeline {
         ANSIBLE_HOST_KEY_CHECKING = 'False'
     }
 
-    tools {
-        jdk 'java'
-        maven 'mvn'
-    }
-
     stages {
         stage('Clean Workspace') {
             steps {
