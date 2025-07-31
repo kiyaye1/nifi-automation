@@ -20,6 +20,7 @@
       apt:
         name: openjdk-17-jdk
         state: present
+
     - name: Install unzip
       apt:
         name: unzip
@@ -40,6 +41,14 @@
       command: mv "{{ nifi_extracted_dir }}" "{{ nifi_target_dir }}"
       args:
         creates: "{{ nifi_target_dir }}"
+
+    - name: Ensure nifi.sh is executable and owned by ubuntu
+      file:
+        path: "{{ nifi_target_dir }}/bin/nifi.sh"
+        mode: '0755'
+        owner: ubuntu
+        group: ubuntu
+        state: file
 
     - name: Get EC2 private IP
       shell: hostname -I | awk '{print $1}'
