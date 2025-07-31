@@ -15,7 +15,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
-                cleanWs() // Clean up old files for a fresh build
+                cleanWs()
             }
         }
 
@@ -30,13 +30,13 @@ pipeline {
 
         stage('Generate Ansible Inventory') {
             steps {
-                sh 'chmod +x ./terraform/inventory-gen.sh'
+                sh 'chmod +x terraform/inventory-gen.sh'
                 sh './terraform/inventory-gen.sh'
                 sh 'cat terraform/ansible/inventory.ini'
             }
         }
 
-        stage('Checkout NiFi 1.26.0') {
+        stage('Checkout Apache NiFi 1.26.0') {
             steps {
                 sh '''
                     rm -rf nifi
@@ -47,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Build with Maven') {
+        stage('Build NiFi with Maven') {
             steps {
                 dir('nifi/nifi-assembly') {
                     sh 'mvn clean install -U -DskipTests'
@@ -59,10 +59,12 @@ pipeline {
             steps {
                 withCredentials([file(credentialsId: 'nifi-key', variable: 'NIFI_KEY_FILE')]) {
                     sh '''
-                        sed "s|ansible_ssh_private_key_file=.*|ansible_ssh_private_key_file=$NIFI_KEY_FILE|" \
-                            ansible/inventory.ini > ansible/inventory_final.ini
+                        mkdir -p ansible
+                        cp terraform/ansible/inventory.ini ansible/inventory.ini
 
-                        ansible-playbook -i ansible/inventory_final.ini ansible/install-nifi.yml
+                        sed -i "s|ansible_ssh_private_key_file=.*|ansible_ssh_private_key_file=$NIFI_KEY_FILE|" ansible/inventory.ini
+
+                        ansible-playbook -i ansible/inventory.ini ansible/install-nifi.yml
                     '''
                 }
             }
@@ -72,7 +74,7 @@ pipeline {
             steps {
                 script {
                     def ip = sh(script: "terraform -chdir=terraform output -raw instance_public_ip", returnStdout: true).trim()
-                    echo "NiFi is now available at: http://${ip}:8443/nifi"
+                    echo "\u2705 NiFi is now available at: http://${ip}:8443/nifi"
                 }
             }
         }
