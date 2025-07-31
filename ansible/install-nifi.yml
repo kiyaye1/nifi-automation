@@ -3,6 +3,14 @@
   hosts: nifi
   become: yes
 
+  vars:
+    nifi_version: "1.26.0"
+    nifi_archive_url: "https://archive.apache.org/dist/nifi/{{ nifi_version }}/nifi-{{ nifi_version }}-bin.zip"
+    nifi_install_dir: "/opt"
+    nifi_zip_path: "/opt/nifi-{{ nifi_version }}-bin.zip"
+    nifi_extracted_dir: "/opt/nifi-{{ nifi_version }}"
+    nifi_target_dir: "/opt/nifi"
+
   tasks:
     - name: Update APT packages
       apt:
@@ -13,21 +21,21 @@
         name: openjdk-17-jdk
         state: present
 
-    - name: Download NiFi 1.26.0
+    - name: Download NiFi {{ nifi_version }}
       get_url:
-        url: https://downloads.apache.org/nifi/1.26.0/nifi-1.26.0-bin.zip
-        dest: /opt/nifi-1.26.0-bin.zip
+        url: "{{ nifi_archive_url }}"
+        dest: "{{ nifi_zip_path }}"
 
     - name: Unzip NiFi
       unarchive:
-        src: /opt/nifi-1.26.0-bin.zip
-        dest: /opt
+        src: "{{ nifi_zip_path }}"
+        dest: "{{ nifi_install_dir }}"
         remote_src: yes
 
     - name: Rename NiFi directory
-      command: mv /opt/nifi-1.26.0 /opt/nifi
+      command: mv "{{ nifi_extracted_dir }}" "{{ nifi_target_dir }}"
       args:
-        creates: /opt/nifi
+        creates: "{{ nifi_target_dir }}"
 
     - name: Get EC2 private IP
       shell: hostname -I | awk '{print $1}'
@@ -35,23 +43,23 @@
 
     - name: Set HTTP host to EC2 private IP
       lineinfile:
-        path: /opt/nifi/conf/nifi.properties
+        path: "{{ nifi_target_dir }}/conf/nifi.properties"
         regexp: '^nifi.web.http.host='
         line: "nifi.web.http.host={{ private_ip.stdout }}"
 
     - name: Set HTTP port to 8443
       lineinfile:
-        path: /opt/nifi/conf/nifi.properties
+        path: "{{ nifi_target_dir }}/conf/nifi.properties"
         regexp: '^nifi.web.http.port='
         line: 'nifi.web.http.port=8443'
 
     - name: Comment out security properties
       replace:
-        path: /opt/nifi/conf/nifi.properties
+        path: "{{ nifi_target_dir }}/conf/nifi.properties"
         regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
-        replace: '#\\0'
+        replace: '#\g<0>'
 
     - name: Start NiFi
-      shell: nohup /opt/nifi/bin/nifi.sh start &
+      shell: "{{ nifi_target_dir }}/bin/nifi.sh start"
       args:
-        chdir: /opt/nifi/bin
+        chdir: "{{ nifi_target_dir }}/bin"
