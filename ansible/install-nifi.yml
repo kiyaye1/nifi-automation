@@ -72,7 +72,7 @@
         regexp: '^nifi.security.(keystore|keystoreType|keystorePasswd|keyPasswd|truststore|truststoreType)='
         replace: '#\g<0>'
 
-        - name: Create NiFi systemd service
+    - name: Create NiFi systemd service
       copy:
         dest: /etc/systemd/system/nifi.service
         content: |
