@@ -25,6 +25,12 @@ pipeline {
             }
         }
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
         stage('Checkout Apache NiFi 1.26.0') {
             steps {
                 sh '''
